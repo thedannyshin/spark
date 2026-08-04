@@ -458,20 +458,20 @@ const commentSeeds = [
   },
 ]
 
-const SESSION_KEY = 'study-quest-session'
-const PROFILE_KEY = 'study-quest-profile'
-const SAVED_KEY = 'study-quest-saved'
-const PROGRESS_KEY = 'study-quest-progress'
-const ANSWERED_KEY = 'study-quest-answered'
-const QUIZ_RESPONSES_KEY = 'study-quest-quiz-responses'
-const STUDY_MODE_KEY = 'study-quest-study-mode'
-const FEED_POSITION_KEY = 'study-quest-feed-position'
-const LAST_FEED_CLASS_KEY = 'study-quest-feed-class'
+const SESSION_KEY = 'spark-session'
+const PROFILE_KEY = 'spark-profile'
+const SAVED_KEY = 'spark-saved'
+const PROGRESS_KEY = 'spark-progress'
+const ANSWERED_KEY = 'spark-answered'
+const QUIZ_RESPONSES_KEY = 'spark-quiz-responses'
+const STUDY_MODE_KEY = 'spark-study-mode'
+const FEED_POSITION_KEY = 'spark-feed-position'
+const LAST_FEED_CLASS_KEY = 'spark-feed-class'
 
 type QuizResponses = Record<number, string>
 type FeedPositions = Record<string, string>
-const MEDIA_ENABLED_KEY = 'study-quest-media-enabled'
-const WELCOME_PENDING_KEY = 'study-quest-welcome-pending'
+const MEDIA_ENABLED_KEY = 'spark-media-enabled'
+const WELCOME_PENDING_KEY = 'spark-welcome-pending'
 
 type FeedItem =
   | { type: 'due'; items: (typeof upcomingItems)[number][] }
@@ -2388,7 +2388,7 @@ function App() {
 
       <a
         className="build-badge"
-        href={`https://github.com/thedannyshin/studyquest/commit/${__COMMIT_SHA__}`}
+        href={`https://github.com/thedannyshin/spark/commit/${__COMMIT_SHA__}`}
         target="_blank"
         rel="noreferrer"
         title={`Build ${__COMMIT_COUNT__} · ${__COMMIT_SHA__}`}
