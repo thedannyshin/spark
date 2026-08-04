@@ -232,7 +232,7 @@ const posts: Post[] = [
     topic: 'system-structure',
     sourceLabel: 'Thinking in Systems + Iceberg Model',
     video: '/How_System_Structure_Drives_Behavior_1.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 2,
@@ -261,7 +261,7 @@ const posts: Post[] = [
     topic: 'mental-models',
     sourceLabel: 'Mental Models and Cluster Maps',
     video: '/How_Mental_Models_Automate_Decisions_1.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 4,
@@ -284,7 +284,7 @@ const posts: Post[] = [
     topic: 'connection-circles',
     sourceLabel: 'Interconnected Circles Map',
     video: '/How_Connection_Circles_Reveal_Hidden_Systems_1.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 6,
@@ -294,7 +294,7 @@ const posts: Post[] = [
     topic: 'connection-circles',
     sourceLabel: 'Interconnected Circles Map',
     video: '/How_Connection_Circles_Reveal_Hidden_Systems_2.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 7,
@@ -323,7 +323,7 @@ const posts: Post[] = [
     topic: 'constraints',
     sourceLabel: 'Leverage Points and Action to Outcome Maps',
     video: '/How_to_Reframe_Artificial_Constraints_1.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 9,
@@ -346,7 +346,7 @@ const posts: Post[] = [
     topic: 'ai-agents',
     sourceLabel: 'Experiment #2: AI Agents',
     video: '/Why_AI_Agents_Are_Killing_Traditional_UX_1.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 11,
@@ -356,7 +356,7 @@ const posts: Post[] = [
     topic: 'ai-agents',
     sourceLabel: 'Experiment #2: AI Agents',
     video: '/Why_AI_Agents_Are_Killing_Traditional_UX_2.mp4',
-    postedBy: 'StudyPop AI',
+    postedBy: 'Spark AI',
   },
   {
     id: 12,
@@ -458,20 +458,20 @@ const commentSeeds = [
   },
 ]
 
-const SESSION_KEY = 'study-pop-session'
-const PROFILE_KEY = 'study-pop-profile'
-const SAVED_KEY = 'study-pop-saved'
-const PROGRESS_KEY = 'study-pop-progress'
-const ANSWERED_KEY = 'study-pop-answered'
-const QUIZ_RESPONSES_KEY = 'study-pop-quiz-responses'
-const STUDY_MODE_KEY = 'study-pop-study-mode'
-const FEED_POSITION_KEY = 'study-pop-feed-position'
-const LAST_FEED_CLASS_KEY = 'study-pop-feed-class'
+const SESSION_KEY = 'study-quest-session'
+const PROFILE_KEY = 'study-quest-profile'
+const SAVED_KEY = 'study-quest-saved'
+const PROGRESS_KEY = 'study-quest-progress'
+const ANSWERED_KEY = 'study-quest-answered'
+const QUIZ_RESPONSES_KEY = 'study-quest-quiz-responses'
+const STUDY_MODE_KEY = 'study-quest-study-mode'
+const FEED_POSITION_KEY = 'study-quest-feed-position'
+const LAST_FEED_CLASS_KEY = 'study-quest-feed-class'
 
 type QuizResponses = Record<number, string>
 type FeedPositions = Record<string, string>
-const MEDIA_ENABLED_KEY = 'study-pop-media-enabled'
-const WELCOME_PENDING_KEY = 'study-pop-welcome-pending'
+const MEDIA_ENABLED_KEY = 'study-quest-media-enabled'
+const WELCOME_PENDING_KEY = 'study-quest-welcome-pending'
 
 type FeedItem =
   | { type: 'due'; items: (typeof upcomingItems)[number][] }
@@ -516,8 +516,8 @@ function formatPosterName(name: string) {
 }
 
 function getVideoAttribution(postedBy: string | undefined, currentUserName: string) {
-  if (!postedBy || postedBy === 'StudyPop AI') {
-    return 'StudyPop AI generated this video'
+  if (!postedBy || postedBy === 'Spark AI') {
+    return 'Spark AI generated this video'
   }
   if (currentUserName && postedBy === currentUserName) {
     return 'You posted this video'
@@ -1086,7 +1086,7 @@ function App() {
             sourceLabel: materialName,
             video: sample.video,
             privacy,
-            postedBy: 'StudyPop AI',
+            postedBy: 'Spark AI',
             generatedFrom: materialName,
           },
           ...current,
@@ -1472,7 +1472,7 @@ function App() {
     return (
       <main className="auth-page">
         <div className="auth-card">
-          <div className="wordmark">StudyPop</div>
+          <div className="wordmark">Spark</div>
           <h1>{authMode === 'signup' ? 'Sign up' : 'Log in'}</h1>
 
           <form onSubmit={submitAuth}>
@@ -1617,10 +1617,10 @@ function App() {
         />
       )}
 
-      <aside id="app-sidebar" className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="StudyPop">
+      <aside id="app-sidebar" className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="Spark">
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <div className="wordmark">StudyPop</div>
+            <div className="wordmark">Spark</div>
             <button
               type="button"
               className="sidebar-close"
@@ -1714,7 +1714,7 @@ function App() {
                 <div className="tiktok-row">
                   <article className="post-frame welcome-session">
                     <div className="welcome-session-content">
-                      <p className="welcome-session-kicker">StudyPop</p>
+                      <p className="welcome-session-kicker">Spark</p>
                       <h2>You&rsquo;re set. Here&rsquo;s how this works.</h2>
                       <p>
                         Your feed mixes short class videos with quick checks. Watch or listen,
@@ -2083,7 +2083,7 @@ function App() {
                   <div className="upload-pick">
                     <span className="upload-generating-spinner" aria-hidden="true" />
                     <strong>Generating your video…</strong>
-                    <span>StudyPop AI is turning your file into a short clip.</span>
+                    <span>Spark AI is turning your file into a short clip.</span>
                   </div>
                 ) : selectedGenerateSample ? (
                   <>
@@ -2111,7 +2111,7 @@ function App() {
                     <span className="upload-pick">
                       <FileText size={28} strokeWidth={2} />
                       <strong>Choose slides, PDFs, or notes</strong>
-                      <span>StudyPop AI turns them into a short video</span>
+                      <span>Spark AI turns them into a short video</span>
                     </span>
                   </button>
                 )}
@@ -2284,7 +2284,7 @@ function App() {
             <header className="upload-picker-header">
               <div>
                 <strong>Choose material</strong>
-                <p>Select a class PDF for StudyPop AI to turn into a video.</p>
+                <p>Select a class PDF for Spark AI to turn into a video.</p>
               </div>
               <button type="button" aria-label="Close" onClick={() => setUploadPickerOpen(false)}>
                 <X size={18} strokeWidth={2.2} />
@@ -3013,7 +3013,7 @@ function PostCard({
                     Source:{' '}
                     {post.generatedFrom ? (
                       post.generatedFrom
-                    ) : !post.postedBy || post.postedBy === 'StudyPop AI' ? (
+                    ) : !post.postedBy || post.postedBy === 'Spark AI' ? (
                       <a href={sourceUrl} target="_blank" rel="noreferrer">
                         {sourceProvider}
                       </a>
