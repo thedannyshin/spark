@@ -1,0 +1,31 @@
+---
+description: After code changes, commit and push automatically unless the user opts out
+alwaysApply: true
+---
+
+# Auto commit & push
+
+After finishing a task that changes files in this repo, **commit and push to the remote** without waiting to be asked.
+
+## When to do it
+
+- You completed the requested work and the working tree has relevant changes
+- Include newly created/edited project files needed for the change
+
+## When not to
+
+- The user says not to commit, not to push, or to wait (e.g. "don't push", "hold off", "no commit")
+- There is nothing to commit
+- The only changes are secrets or local env files (`.env`, credentials) — warn instead of committing those
+
+## How
+
+Follow the repo’s normal git safety habits:
+
+1. `git status`, `git diff`, and recent `git log` to draft the message
+2. Stage relevant files only
+3. Commit with a concise message (why over what) via HEREDOC
+4. `git push -u origin HEAD` (or the tracked branch)
+5. Confirm with `git status`
+
+Do not force-push, amend pushed commits, skip hooks, or update git config unless the user explicitly asks.
