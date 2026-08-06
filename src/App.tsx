@@ -1472,7 +1472,9 @@ function App() {
     return (
       <main className="auth-page">
         <div className="auth-card">
-          <div className="wordmark">Spark</div>
+          <div className="wordmark">
+            <img src="/logo.png" alt="Spark" className="wordmark-logo" />
+          </div>
           <h1>{authMode === 'signup' ? 'Sign up' : 'Log in'}</h1>
 
           <form onSubmit={submitAuth}>
@@ -1620,7 +1622,9 @@ function App() {
       <aside id="app-sidebar" className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="Spark">
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <div className="wordmark">Spark</div>
+            <div className="wordmark">
+              <img src="/logo.png" alt="Spark" className="wordmark-logo" />
+            </div>
             <button
               type="button"
               className="sidebar-close"
@@ -2386,15 +2390,6 @@ function App() {
         document.body,
       )}
 
-      <a
-        className="build-badge"
-        href={`https://github.com/thedannyshin/spark/commit/${__COMMIT_SHA__}`}
-        target="_blank"
-        rel="noreferrer"
-        title={`Build ${__COMMIT_COUNT__} · ${__COMMIT_SHA__}`}
-      >
-        {__COMMIT_COUNT__} · {__COMMIT_SHA__}
-      </a>
     </main>
   )
 }
