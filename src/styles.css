@@ -10,19 +10,25 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
 
-  /* Logo spectrum: yellow → orange → magenta → violet → blue */
+  /* Logo spectrum — solid stops for rare stacked borders */
   --spark-yellow: #ffb800;
   --spark-orange: #ff5a00;
-  --spark-magenta: #e6007a;
-  --spark-violet: #7a00a8;
-  --spark-blue: #0066c8;
-  --brand-gradient: linear-gradient(
-    118deg,
-    var(--spark-yellow) 0%,
-    var(--spark-orange) 32%,
-    var(--spark-magenta) 64%,
-    var(--spark-blue) 100%
-  );
+  --spark-red: #e02020;
+  --spark-magenta: #c4007a;
+  --spark-blue: #1a4db8;
+  /* Stepped extrusion like the logo mark (use sparingly) */
+  --spark-stack:
+    -2px 2px 0 var(--spark-yellow),
+    -4px 4px 0 var(--spark-orange),
+    -6px 6px 0 var(--spark-red),
+    -8px 8px 0 var(--spark-magenta),
+    -10px 10px 0 var(--spark-blue);
+  --spark-stack-sm:
+    -1px 1px 0 var(--spark-yellow),
+    -2px 2px 0 var(--spark-orange),
+    -3px 3px 0 var(--spark-red),
+    -4px 4px 0 var(--spark-magenta),
+    -5px 5px 0 var(--spark-blue);
 
   --bg: #050505;
   --surface: #121212;
@@ -67,7 +73,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 }
 .brand-logo {
   display: block;
-  height: 28px;
+  height: 72px;
   width: auto;
   object-fit: contain;
 }
@@ -90,9 +96,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   place-items: center;
   padding: 32px 20px;
   background:
-    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 90, 0, 0.22), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(0, 102, 200, 0.18), transparent 50%),
-    radial-gradient(ellipse 50% 35% at 10% 80%, rgba(230, 0, 122, 0.14), transparent 45%),
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 90, 0, 0.14), transparent 55%),
     var(--bg);
 }
 .auth-card {
@@ -103,9 +107,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   padding: 32px;
   backdrop-filter: blur(12px);
 }
-.auth-card .wordmark { margin-bottom: 28px; }
+.auth-card .wordmark { margin-bottom: 32px; }
 .auth-card .brand-logo {
-  height: 40px;
+  height: 128px;
 }
 .auth-card h1 {
   font-family: var(--font-display);
@@ -140,15 +144,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   cursor: pointer;
 }
 .primary-button {
-  background: var(--brand-gradient);
-  background-size: 160% 160%;
+  background: var(--accent);
   color: #fff;
   margin-top: 4px;
-  transition: background-position 0.35s ease, filter 0.2s ease;
+  transition: background 0.2s ease;
 }
 .primary-button:hover {
-  background-position: 100% 50%;
-  filter: brightness(1.06);
+  background: var(--accent-hover);
 }
 .divider { margin: 20px 0; height: 1px; background: #2a2a2a; text-align: center; }
 .divider span { position: relative; top: -10px; padding: 0 12px; background: rgba(18, 18, 18, 0.92); color: #777; font-size: 12px; }
@@ -224,7 +226,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 /* Sync */
 .sync-card { text-align: center; }
 .progress-track { height: 4px; background: #2a2a2a; border-radius: 5px; overflow: hidden; margin: 0 0 22px; }
-.progress-track span { display: block; height: 100%; background: var(--brand-gradient); transition: width .2s; }
+.progress-track span { display: block; height: 100%; background: var(--accent); transition: width .2s; }
 .sync-status { text-align: left; display: grid; gap: 8px; }
 .sync-status > div { display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: #161616; opacity: .45; }
 .sync-status > div.ready { opacity: 1; }
@@ -261,12 +263,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   min-height: 0;
 }
 .app-sidebar .wordmark {
-  padding: 6px 10px 4px;
+  padding: 4px 8px 2px;
   font-size: 24px;
   letter-spacing: -0.035em;
 }
 .app-sidebar .brand-logo {
-  height: 26px;
+  height: 76px;
 }
 .sidebar-brand {
   display: flex;
@@ -422,7 +424,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   cursor: pointer;
 }
 .panel-tabs button.active {
-  background: var(--brand-gradient);
+  background: var(--accent);
   color: #fff;
 }
 .media-grid {
@@ -648,7 +650,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   padding: 0 12px;
   border: 0;
   border-radius: 10px;
-  background: var(--brand-gradient);
+  background: var(--accent);
   color: #fff;
   font-family: var(--font-display);
   font-size: 13px;
@@ -955,7 +957,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--brand-gradient);
+  background: var(--accent);
 }
 .progress-bar.slim {
   height: 5px;
@@ -1082,7 +1084,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   -webkit-tap-highlight-color: transparent;
 }
 .study-mode-toggle button.active {
-  background: var(--brand-gradient);
+  background: var(--accent);
   color: #fff;
 }
 .post-frame.is-passive .lesson-media video {
@@ -1153,7 +1155,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--brand-gradient);
+  background: #f2f2f2;
 }
 .passive-times {
   display: flex;
@@ -1172,13 +1174,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   height: 88px;
   border: 0;
   border-radius: 999px;
-  background: var(--brand-gradient);
-  color: #fff;
+  background: #fff;
+  color: #111;
   display: grid;
   place-items: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 12px 32px rgba(255, 90, 0, 0.28);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
 }
 .passive-play-btn.is-starting {
   cursor: default;
@@ -1650,7 +1652,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   padding: 0 14px;
   border: 0;
   border-radius: 10px;
-  background: var(--brand-gradient);
+  background: var(--accent);
   color: #fff;
   font-family: var(--font-display);
   font-size: 13px;
@@ -1840,9 +1842,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .post-frame.welcome-session {
   position: relative;
   background:
-    radial-gradient(ellipse 90% 55% at 20% 15%, rgba(255, 90, 0, 0.2), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 95% 70%, rgba(0, 102, 200, 0.2), transparent 50%),
-    radial-gradient(ellipse 55% 40% at 60% 100%, rgba(230, 0, 122, 0.14), transparent 45%),
+    radial-gradient(ellipse 90% 55% at 20% 15%, rgba(255, 90, 0, 0.12), transparent 55%),
     #050505;
 }
 .welcome-session-content {
@@ -1857,6 +1857,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
     calc(88px + env(safe-area-inset-bottom));
   max-width: 34rem;
 }
+.welcome-session-brand {
+  margin: 0 0 4px;
+}
+.welcome-session-logo {
+  height: clamp(104px, 24vw, 176px);
+  width: auto;
+  max-width: min(100%, 840px);
+}
 .welcome-session-kicker {
   margin: 0;
   font-family: var(--font-display);
@@ -1864,10 +1872,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   font-weight: 800;
   letter-spacing: .12em;
   text-transform: uppercase;
-  background: var(--brand-gradient);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--spark-orange);
 }
 .welcome-session-content h2 {
   margin: 0;
@@ -1887,13 +1892,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   line-height: 1.5;
 }
 .welcome-session-btn {
-  margin-top: 8px;
+  margin-top: 10px;
   border: 0;
-  border-radius: 14px;
-  background: var(--brand-gradient);
-  background-size: 160% 160%;
-  color: #fff;
-  padding: 14px 18px;
+  border-radius: 12px;
+  background: #fff;
+  color: #0a0a0a;
+  padding: 14px 20px;
   font-family: var(--font-display);
   font-size: 15px;
   font-weight: 800;
@@ -1902,18 +1906,20 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   align-items: center;
   justify-content: center;
   gap: 10px;
+  box-shadow: var(--spark-stack);
   -webkit-tap-highlight-color: transparent;
-  transition: background-position 0.35s ease, transform 0.15s ease;
+  transition: transform 0.15s ease, filter 0.2s ease;
 }
 .welcome-session-btn:disabled {
   opacity: 0.8;
   cursor: default;
 }
 .welcome-session-btn:hover:not(:disabled) {
-  background-position: 100% 50%;
+  filter: brightness(1.03);
 }
 .welcome-session-btn:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: translate(-1px, 1px);
+  box-shadow: var(--spark-stack-sm);
 }
 .welcome-session-ready {
   margin: 8px 0 0;
@@ -1994,12 +2000,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .complete-badge {
   width: 72px;
   height: 72px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
   border-radius: 50%;
-  background: var(--brand-gradient);
-  color: #fff;
+  background: #fff;
+  color: #0a0a0a;
   display: grid;
   place-items: center;
+  box-shadow: var(--spark-stack-sm);
 }
 .complete-content h2 {
   margin: 0;
@@ -2160,7 +2167,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   height: 42px;
   border: 0;
   border-radius: 10px;
-  background: var(--brand-gradient);
+  background: var(--accent);
   color: #fff;
   display: grid;
   place-items: center;
@@ -2183,8 +2190,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   padding: 0 16px;
   border: 0;
   border-radius: 10px;
-  background: var(--brand-gradient);
-  background-size: 160% 160%;
+  background: var(--accent);
   color: #fff;
   font-family: var(--font-display);
   font-weight: 800;
@@ -2194,11 +2200,10 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  transition: background-position 0.35s ease, filter 0.2s ease;
+  transition: background 0.2s ease;
 }
 .lesson-primary:hover:not(:disabled) {
-  background-position: 100% 50%;
-  filter: brightness(1.06);
+  background: var(--accent-hover);
 }
 .lesson-primary:disabled {
   background: #333;
@@ -2479,7 +2484,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
     border-bottom: 0;
   }
   .panel-tabs button.active {
-    background: var(--brand-gradient);
+    background: var(--accent);
     color: #fff;
     border-bottom-color: transparent;
   }

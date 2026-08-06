@@ -1718,7 +1718,9 @@ function App() {
                 <div className="tiktok-row">
                   <article className="post-frame welcome-session">
                     <div className="welcome-session-content">
-                      <p className="welcome-session-kicker">Spark</p>
+                      <div className="welcome-session-brand" aria-label="Spark">
+                        <img src="/logo.png" alt="Spark" className="brand-logo welcome-session-logo" />
+                      </div>
                       <h2>You&rsquo;re set. Here&rsquo;s how this works.</h2>
                       <p>
                         Your feed mixes short class videos with quick checks. Watch or listen,
