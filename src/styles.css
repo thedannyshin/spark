@@ -1,15 +1,39 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Syne:wght@700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
   color-scheme: dark;
-  font-family: 'Inter', sans-serif;
-  color: #f2f2f2;
-  background: #0a0a0a;
+  --font-display: 'Nunito', sans-serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --accent: #72e1d6;
-  --accent-hover: #8ae8df;
+
+  /* Logo spectrum: yellow → orange → magenta → violet → blue */
+  --spark-yellow: #ffb800;
+  --spark-orange: #ff5a00;
+  --spark-magenta: #e6007a;
+  --spark-violet: #7a00a8;
+  --spark-blue: #0066c8;
+  --brand-gradient: linear-gradient(
+    118deg,
+    var(--spark-yellow) 0%,
+    var(--spark-orange) 32%,
+    var(--spark-magenta) 64%,
+    var(--spark-blue) 100%
+  );
+
+  --bg: #050505;
+  --surface: #121212;
+  --surface-2: #1a1a1a;
+  --border: #2c2c2c;
+  --text: #fafafa;
+  --muted: #959595;
+  --accent: var(--spark-orange);
+  --accent-hover: #ff7a2e;
   --accent-ink: #0a0a0a;
+  --accent-soft: rgba(255, 90, 0, 0.16);
 }
 
 * { box-sizing: border-box; }
@@ -27,27 +51,37 @@ body {
 }
 button, input { font: inherit; }
 button { color: inherit; }
-button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-offset: 2px; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .wordmark {
   display: flex;
   align-items: center;
   gap: 10px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: -0.03em;
+  color: var(--text);
   flex-shrink: 0;
+  text-transform: none;
 }
-
-.wordmark-logo {
+.brand-logo {
   display: block;
-  height: 36px;
+  height: 28px;
   width: auto;
   object-fit: contain;
 }
+
+.wordmark.light { color: #fff; }
 .eyebrow, .step-label {
+  font-family: var(--font-display);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 1.7px;
+  text-transform: uppercase;
+  color: var(--spark-orange);
 }
-.muted { color: #8a8a8a; line-height: 1.55; }
+.muted { color: var(--muted); line-height: 1.55; }
 
 /* Auth */
 .auth-page {
@@ -55,20 +89,28 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   display: grid;
   place-items: center;
   padding: 32px 20px;
-  background: #0a0a0a;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 90, 0, 0.22), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 90%, rgba(0, 102, 200, 0.18), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 10% 80%, rgba(230, 0, 122, 0.14), transparent 45%),
+    var(--bg);
 }
 .auth-card {
   width: min(100%, 400px);
-  background: #141414;
-  border: 1px solid #333;
-  border-radius: 14px;
+  background: rgba(18, 18, 18, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 16px;
   padding: 32px;
+  backdrop-filter: blur(12px);
 }
 .auth-card .wordmark { margin-bottom: 28px; }
-.auth-card .wordmark-logo { height: 44px; }
+.auth-card .brand-logo {
+  height: 40px;
+}
 .auth-card h1 {
-  font-family: 'Inter', sans-serif;
-  font-size: 32px;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
   letter-spacing: -1.4px;
   margin: 0 0 24px;
 }
@@ -77,29 +119,39 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 .auth-card input {
   width: 100%;
   height: 48px;
-  border: 1px solid #333;
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
   padding: 0 14px;
-  background: #0a0a0a;
-  color: #f2f2f2;
+  background: var(--bg);
+  color: var(--text);
 }
-.auth-card input::placeholder { color: #8a8a8a; }
+.auth-card input::placeholder { color: var(--muted); }
 .primary-button, .google-button {
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   height: 48px;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 800;
   cursor: pointer;
 }
-.primary-button { background: var(--accent); color: var(--accent-ink); margin-top: 4px; }
-.primary-button:hover { background: var(--accent-hover); }
+.primary-button {
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  color: #fff;
+  margin-top: 4px;
+  transition: background-position 0.35s ease, filter 0.2s ease;
+}
+.primary-button:hover {
+  background-position: 100% 50%;
+  filter: brightness(1.06);
+}
 .divider { margin: 20px 0; height: 1px; background: #2a2a2a; text-align: center; }
-.divider span { position: relative; top: -10px; padding: 0 12px; background: #141414; color: #777; font-size: 12px; }
+.divider span { position: relative; top: -10px; padding: 0 12px; background: rgba(18, 18, 18, 0.92); color: #777; font-size: 12px; }
 .google-button { border: 1px solid #333; background: #141414; }
 .google-g { font-family: Arial, sans-serif; font-weight: 700; font-size: 18px; }
 .switch-auth { text-align: center; color: #8a8a8a; margin: 22px 0 0; font-size: 14px; }
@@ -107,9 +159,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   border: 0;
   background: none;
   text-decoration: underline;
+  text-underline-offset: 3px;
   font-weight: 700;
   cursor: pointer;
   margin-left: 5px;
+  color: var(--spark-orange);
 }
 
 /* Onboarding */
@@ -118,7 +172,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   display: grid;
   place-items: center;
   padding: 32px 20px;
-  background: #0a0a0a;
+  background:
+    radial-gradient(ellipse 70% 45% at 50% 0%, rgba(255, 90, 0, 0.16), transparent 55%),
+    var(--bg);
 }
 .connect-card, .sync-card {
   width: min(100%, 440px);
@@ -139,8 +195,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   cursor: pointer;
 }
 .connect-card h1, .sync-card h1 {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
+  font-weight: 800;
   letter-spacing: -1px;
   line-height: 1.15;
   margin: 0 0 22px;
@@ -167,7 +224,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 /* Sync */
 .sync-card { text-align: center; }
 .progress-track { height: 4px; background: #2a2a2a; border-radius: 5px; overflow: hidden; margin: 0 0 22px; }
-.progress-track span { display: block; height: 100%; background: #f2f2f2; transition: width .2s; }
+.progress-track span { display: block; height: 100%; background: var(--brand-gradient); transition: width .2s; }
 .sync-status { text-align: left; display: grid; gap: 8px; }
 .sync-status > div { display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; background: #161616; opacity: .45; }
 .sync-status > div.ready { opacity: 1; }
@@ -205,10 +262,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .app-sidebar .wordmark {
   padding: 6px 10px 4px;
+  font-size: 24px;
+  letter-spacing: -0.035em;
 }
-
-.app-sidebar .wordmark-logo {
-  height: 32px;
+.app-sidebar .brand-logo {
+  height: 26px;
 }
 .sidebar-brand {
   display: flex;
@@ -253,9 +311,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .nav-parent.active {
   color: var(--accent);
+  background: var(--accent-soft);
 }
 .nav-parent:hover {
   background: #1a1a1a;
+}
+.nav-parent.active:hover {
+  background: var(--accent-soft);
 }
 .nav-sub {
   display: grid;
@@ -285,6 +347,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 .nav-sub > button.active {
   color: var(--accent);
   font-weight: 700;
+  background: var(--accent-soft);
 }
 .nav-sub > button:hover {
   background: #1a1a1a;
@@ -324,8 +387,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .panel-header h1 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 34px;
+  font-weight: 800;
   letter-spacing: -.9px;
   line-height: 1.1;
 }
@@ -358,8 +422,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   cursor: pointer;
 }
 .panel-tabs button.active {
-  background: #f2f2f2;
-  color: #0a0a0a;
+  background: var(--brand-gradient);
+  color: #fff;
 }
 .media-grid {
   list-style: none;
@@ -583,11 +647,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   height: 36px;
   padding: 0 12px;
   border: 0;
-  border-radius: 8px;
-  background: #f2f2f2;
-  color: #0a0a0a;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  color: #fff;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
 }
 .upload-filename {
@@ -706,9 +771,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .upload-picker-filters button.active,
 .upload-picker-filters button:hover {
-  border-color: #f2f2f2;
-  background: #f2f2f2;
-  color: #111;
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 .upload-picker-list {
   list-style: none;
@@ -890,7 +955,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #f2f2f2;
+  background: var(--brand-gradient);
 }
 .progress-bar.slim {
   height: 5px;
@@ -965,7 +1030,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .profile-section-head h2 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 20px;
   letter-spacing: -.4px;
 }
@@ -1017,8 +1082,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   -webkit-tap-highlight-color: transparent;
 }
 .study-mode-toggle button.active {
-  background: #f2f2f2;
-  color: #111;
+  background: var(--brand-gradient);
+  color: #fff;
 }
 .post-frame.is-passive .lesson-media video {
   opacity: 0;
@@ -1051,19 +1116,21 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .passive-kicker {
   margin: 0;
-  color: #8a8a8a;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .04em;
+  font-weight: 800;
+  letter-spacing: .1em;
   text-transform: uppercase;
+  color: var(--spark-orange);
 }
 .passive-meta h2 {
   margin: 0;
   max-width: 11em;
+  font-family: var(--font-display);
   font-size: clamp(32px, 9vw, 44px);
   line-height: 1.08;
   letter-spacing: -.05em;
-  font-weight: 800;
+  font-weight: 900;
 }
 .passive-hint {
   margin: 0;
@@ -1086,7 +1153,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #f2f2f2;
+  background: var(--brand-gradient);
 }
 .passive-times {
   display: flex;
@@ -1105,13 +1172,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   height: 88px;
   border: 0;
   border-radius: 999px;
-  background: #f2f2f2;
-  color: #111;
+  background: var(--brand-gradient);
+  color: #fff;
   display: grid;
   place-items: center;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 12px 32px rgba(255, 90, 0, 0.28);
 }
 .passive-play-btn.is-starting {
   cursor: default;
@@ -1424,7 +1491,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .quiz-header h2 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 26px;
   line-height: 1.2;
   letter-spacing: -.8px;
@@ -1582,11 +1649,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   height: 42px;
   padding: 0 14px;
   border: 0;
-  border-radius: 8px;
-  background: #f2f2f2;
-  color: #0a0a0a;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  color: #fff;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
 }
 .action-icon {
@@ -1771,7 +1839,11 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .post-frame.welcome-session {
   position: relative;
-  background: #0a0a0a;
+  background:
+    radial-gradient(ellipse 90% 55% at 20% 15%, rgba(255, 90, 0, 0.2), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 95% 70%, rgba(0, 102, 200, 0.2), transparent 50%),
+    radial-gradient(ellipse 55% 40% at 60% 100%, rgba(230, 0, 122, 0.14), transparent 45%),
+    #050505;
 }
 .welcome-session-content {
   height: 100%;
@@ -1787,20 +1859,25 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .welcome-session-kicker {
   margin: 0;
-  color: #8a8a8a;
+  font-family: var(--font-display);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: .04em;
+  font-weight: 800;
+  letter-spacing: .12em;
   text-transform: uppercase;
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 .welcome-session-content h2 {
   margin: 0;
   max-width: 12em;
+  font-family: var(--font-display);
   font-size: clamp(30px, 7vw, 42px);
   line-height: 1.1;
   letter-spacing: -.04em;
-  font-weight: 800;
-  color: #f2f2f2;
+  font-weight: 900;
+  color: #fff;
 }
 .welcome-session-content p {
   margin: 0;
@@ -1813,21 +1890,27 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   margin-top: 8px;
   border: 0;
   border-radius: 14px;
-  background: #f2f2f2;
-  color: #111;
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  color: #fff;
   padding: 14px 18px;
+  font-family: var(--font-display);
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   -webkit-tap-highlight-color: transparent;
+  transition: background-position 0.35s ease, transform 0.15s ease;
 }
 .welcome-session-btn:disabled {
   opacity: 0.8;
   cursor: default;
+}
+.welcome-session-btn:hover:not(:disabled) {
+  background-position: 100% 50%;
 }
 .welcome-session-btn:active:not(:disabled) {
   transform: scale(0.98);
@@ -1913,14 +1996,14 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   height: 72px;
   margin-bottom: 8px;
   border-radius: 50%;
-  background: #f2f2f2;
-  color: #0a0a0a;
+  background: var(--brand-gradient);
+  color: #fff;
   display: grid;
   place-items: center;
 }
 .complete-content h2 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: -.8px;
   font-weight: 800;
@@ -1937,7 +2020,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .assignment-content h2 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: -.8px;
   line-height: 1.15;
@@ -1957,7 +2040,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
 }
 .due-panel h2 {
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-display);
   font-size: 28px;
   letter-spacing: -.8px;
   line-height: 1.15;
@@ -2076,9 +2159,9 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   width: 42px;
   height: 42px;
   border: 0;
-  border-radius: 8px;
-  background: #f2f2f2;
-  color: #0a0a0a;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  color: #fff;
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -2099,19 +2182,23 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   height: 40px;
   padding: 0 16px;
   border: 0;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--accent-ink);
-  font-weight: 700;
+  border-radius: 10px;
+  background: var(--brand-gradient);
+  background-size: 160% 160%;
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+  transition: background-position 0.35s ease, filter 0.2s ease;
 }
 .lesson-primary:hover:not(:disabled) {
-  background: var(--accent-hover);
+  background-position: 100% 50%;
+  filter: brightness(1.06);
 }
 .lesson-primary:disabled {
   background: #333;
@@ -2152,12 +2239,12 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
   font-size: 11px;
 }
 .quiz-options button.selected {
-  border: 2px solid #fff;
+  border: 2px solid var(--accent);
   padding: 8px 13px;
 }
 .quiz-options button.correct {
-  border-color: #fff;
-  background: rgba(255,255,255,.16);
+  border-color: var(--spark-yellow);
+  background: rgba(255, 184, 0, 0.16);
 }
 .quiz-options button.wrong {
   border-color: rgba(255,255,255,.55);
@@ -2392,8 +2479,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid #f2f2f2; outline-
     border-bottom: 0;
   }
   .panel-tabs button.active {
-    background: #f2f2f2;
-    color: #0a0a0a;
+    background: var(--brand-gradient);
+    color: #fff;
     border-bottom-color: transparent;
   }
   .panel-empty {

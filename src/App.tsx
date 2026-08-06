@@ -1472,8 +1472,8 @@ function App() {
     return (
       <main className="auth-page">
         <div className="auth-card">
-          <div className="wordmark">
-            <img src="/logo.png" alt="Spark" className="wordmark-logo" />
+          <div className="wordmark" aria-label="Spark">
+            <img src="/logo.png" alt="Spark" className="brand-logo" />
           </div>
           <h1>{authMode === 'signup' ? 'Sign up' : 'Log in'}</h1>
 
@@ -1622,8 +1622,8 @@ function App() {
       <aside id="app-sidebar" className={`app-sidebar${mobileNavOpen ? ' open' : ''}`} aria-label="Spark">
         <div className="sidebar-top">
           <div className="sidebar-brand">
-            <div className="wordmark">
-              <img src="/logo.png" alt="Spark" className="wordmark-logo" />
+            <div className="wordmark" aria-label="Spark">
+              <img src="/logo.png" alt="Spark" className="brand-logo" />
             </div>
             <button
               type="button"
