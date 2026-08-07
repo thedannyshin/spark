@@ -3053,24 +3053,35 @@ function PostCard({
       video.muted = !soundOnRef.current
     }
 
-    void video.play().then(() => {
-      if (cancelled || !activeRef.current) {
-        stop()
-        return
-      }
-      setAutoplayPending(false)
-      if (passive && video.muted) {
-        primeVideoForSound(video)
-        soundOnRef.current = true
-        setSoundOn(true)
-      }
-      if (!video.paused) hideControlsAfterDelay()
-    }).catch(() => {
-      if (!passive) return
-      // Autoplay with sound blocked until the next tap.
-      setAutoplayPending(false)
-      setPlaying(false)
-    })
+    const tryPlay = () => {
+      if (cancelled || !activeRef.current) return
+      void video.play().then(() => {
+        if (cancelled || !activeRef.current) {
+          stop()
+          return
+        }
+        setAutoplayPending(false)
+        if (passive && video.muted) {
+          primeVideoForSound(video)
+          soundOnRef.current = true
+          setSoundOn(true)
+        }
+        if (!video.paused) hideControlsAfterDelay()
+      }).catch(() => {
+        if (cancelled || !activeRef.current) return
+        if (!passive) {
+          // Retry once data is ready (common right after a swipe).
+          video.addEventListener('loadeddata', tryPlay, { once: true })
+          if (video.readyState < 2) video.load()
+          return
+        }
+        // Autoplay with sound blocked until the next tap.
+        setAutoplayPending(false)
+        setPlaying(false)
+      })
+    }
+
+    tryPlay()
 
     return () => {
       cancelled = true
