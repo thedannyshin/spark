@@ -778,7 +778,9 @@ function App() {
   const feedRef = useRef<HTMLElement>(null)
   const restoreFeedRef = useRef(true)
   const pendingStudyPostIdRef = useRef<number | null>(null)
+  const pendingOpenCommentsRef = useRef(false)
   const browseClassRef = useRef('All')
+  const [homeLinkCopiedId, setHomeLinkCopiedId] = useState<number | null>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const passiveMode = mobileStudy && studyMode === 'passive'
 
@@ -1028,11 +1030,12 @@ function App() {
     localStorage.setItem(LAST_FEED_CLASS_KEY, classCode)
   }
 
-  const openStudyPost = (postId: number) => {
+  const openStudyPost = (postId: number, options?: { comments?: boolean }) => {
     const post = allPosts.find((item) => item.id === postId)
     if (!post) return
     browseClassRef.current = selectedClass
     pendingStudyPostIdRef.current = postId
+    pendingOpenCommentsRef.current = Boolean(options?.comments)
     setStudyMode('active')
     setSelectedClass('All')
     setMainView('feed')
@@ -1040,6 +1043,33 @@ function App() {
     setMobileNavOpen(false)
     localStorage.setItem(LAST_FEED_CLASS_KEY, 'All')
     restoreFeedRef.current = true
+  }
+
+  const copyHomePostLink = async (postId: number) => {
+    const url = `${window.location.origin}${window.location.pathname}#lesson-${postId}`
+    try {
+      await navigator.clipboard.writeText(url)
+      setHomeLinkCopiedId(postId)
+      window.setTimeout(() => {
+        setHomeLinkCopiedId((current) => (current === postId ? null : current))
+      }, 1600)
+    } catch {
+      // ignore clipboard failures
+    }
+  }
+
+  const showHomeVideoFrame = (video: HTMLVideoElement) => {
+    const reveal = () => {
+      if (video.readyState >= 2 && video.currentTime < 0.05) {
+        try {
+          video.currentTime = 0.05
+        } catch {
+          // ignore seek errors before enough data
+        }
+      }
+    }
+    if (video.readyState >= 1) reveal()
+    else video.addEventListener('loadedmetadata', reveal, { once: true })
   }
 
   const openFeedClass = (classCode: string) => {
@@ -1311,12 +1341,15 @@ function App() {
   const dismissWelcome = () => {
     if (!welcomePending) return
     const pendingId = pendingStudyPostIdRef.current
+    const openComments = pendingOpenCommentsRef.current
     writeWelcomePending(false)
     setWelcomePending(false)
     window.requestAnimationFrame(() => {
       if (pendingId != null) {
         pendingStudyPostIdRef.current = null
+        pendingOpenCommentsRef.current = false
         pinFeedToPost(pendingId)
+        if (openComments) setCommentsOpen(true)
         return
       }
       const nextIndex = Math.max(0, activeIndex - 1)
@@ -1438,6 +1471,10 @@ function App() {
       slides?.[targetIndex]?.scrollIntoView({ behavior: 'auto', block: 'start' })
       setActiveIndex(targetIndex)
       restoreFeedRef.current = false
+      if (pendingOpenCommentsRef.current) {
+        pendingOpenCommentsRef.current = false
+        setCommentsOpen(true)
+      }
     })
   }, [screen, mainView, selectedClass, visibleFeedItems.length, feedPositions, mediaEnabled, welcomePending])
 
@@ -1778,10 +1815,9 @@ function App() {
               {homeVideos.map((post) => {
                 const classMeta = classFilters.find((item) => item.id === post.classCode)
                 const ClassIcon = classMeta?.Icon ?? BookOpen
-                const poster = !post.postedBy || post.postedBy === 'Spark AI'
-                  ? 'Spark AI'
-                  : formatPosterName(post.postedBy)
+                const userName = classMeta?.label ?? post.classCode
                 const saved = savedIds.includes(post.id)
+                const linkCopied = homeLinkCopiedId === post.id
                 return (
                   <article key={post.id} className="ig-post">
                     <header className="ig-post-header">
@@ -1789,14 +1825,13 @@ function App() {
                         type="button"
                         className="ig-post-user"
                         onClick={() => openHome(post.classCode)}
-                        aria-label={`View ${post.classCode}`}
+                        aria-label={`View ${userName}`}
                       >
                         <span className="ig-post-avatar" aria-hidden="true">
                           <ClassIcon size={18} strokeWidth={2.2} />
                         </span>
                         <span className="ig-post-user-copy">
-                          <strong>{poster}</strong>
-                          <span>{post.classCode}</span>
+                          <strong>{userName}</strong>
                         </span>
                       </button>
                     </header>
@@ -1807,7 +1842,14 @@ function App() {
                       onClick={() => openStudyPost(post.id)}
                       aria-label={`Open ${post.title}`}
                     >
-                      <video src={post.video} muted playsInline preload="metadata" />
+                      <video
+                        src={`${post.video}#t=0.1`}
+                        muted
+                        playsInline
+                        preload="auto"
+                        onLoadedMetadata={(event) => showHomeVideoFrame(event.currentTarget)}
+                        onLoadedData={(event) => showHomeVideoFrame(event.currentTarget)}
+                      />
                       <span className="ig-post-play" aria-hidden="true">
                         <Play size={28} fill="currentColor" />
                       </span>
@@ -1824,17 +1866,26 @@ function App() {
                       </button>
                       <button
                         type="button"
-                        className="ig-action ig-action-study"
-                        onClick={() => openStudyPost(post.id)}
+                        className="ig-action"
+                        aria-label="Comments"
+                        onClick={() => openStudyPost(post.id, { comments: true })}
                       >
-                        Study
-                        <ChevronRight size={16} strokeWidth={2.4} />
+                        <MessageCircle size={22} strokeWidth={2} />
                       </button>
+                      <button
+                        type="button"
+                        className="ig-action"
+                        aria-label={linkCopied ? 'Link copied' : 'Copy link'}
+                        onClick={() => { void copyHomePostLink(post.id) }}
+                      >
+                        <Link size={22} strokeWidth={2} />
+                      </button>
+                      {linkCopied && <span className="ig-link-copied">Copied</span>}
                     </div>
 
                     <div className="ig-post-caption">
                       <p>
-                        <strong>{poster}</strong>
+                        <strong>{userName}</strong>
                         {' '}
                         {post.title}
                       </p>
