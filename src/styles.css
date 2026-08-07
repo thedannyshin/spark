@@ -1262,6 +1262,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   min-height: 0;
   display: flex;
   position: relative;
+  touch-action: pan-y;
+  transition: transform 0.18s ease;
+  background: #141414;
+}
+.feed-layout.is-swiping-back {
+  transition: none;
+  will-change: transform;
 }
 .study-mode-toggle {
   display: none;

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { FormEvent, PointerEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import {
   isMobileStudyDevice,
@@ -1560,6 +1560,75 @@ function App() {
     setActiveIndex(next)
   }
 
+  const swipeBackRef = useRef<{
+    pointerId: number
+    x: number
+    y: number
+    tracking: boolean
+    horizontal: boolean
+  } | null>(null)
+  const [swipeBackOffset, setSwipeBackOffset] = useState(0)
+
+  const resetSwipeBack = () => {
+    swipeBackRef.current = null
+    setSwipeBackOffset(0)
+  }
+
+  const onStudySwipeStart = (event: PointerEvent<HTMLDivElement>) => {
+    if (commentsOpen || event.button !== 0) return
+    const target = event.target as HTMLElement | null
+    if (target?.closest('input, textarea, button, a, .fill-field, .passive-scrubber')) return
+    swipeBackRef.current = {
+      pointerId: event.pointerId,
+      x: event.clientX,
+      y: event.clientY,
+      tracking: true,
+      horizontal: false,
+    }
+  }
+
+  const onStudySwipeMove = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = swipeBackRef.current
+    if (!gesture?.tracking || gesture.pointerId !== event.pointerId) return
+    const dx = event.clientX - gesture.x
+    const dy = event.clientY - gesture.y
+
+    if (!gesture.horizontal) {
+      if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return
+      // Commit to horizontal back-swipe only when clearly left → right.
+      if (dx > 14 && dx > Math.abs(dy) * 1.25) {
+        gesture.horizontal = true
+        try {
+          event.currentTarget.setPointerCapture(event.pointerId)
+        } catch {
+          // ignore capture failures
+        }
+      } else {
+        gesture.tracking = false
+        setSwipeBackOffset(0)
+        return
+      }
+    }
+
+    event.preventDefault()
+    setSwipeBackOffset(Math.max(0, Math.min(dx, 180)))
+  }
+
+  const onStudySwipeEnd = (event: PointerEvent<HTMLDivElement>) => {
+    const gesture = swipeBackRef.current
+    if (!gesture || gesture.pointerId !== event.pointerId) return
+    const dx = event.clientX - gesture.x
+    const dy = event.clientY - gesture.y
+    const shouldGoBack = gesture.horizontal && dx > 88 && dx > Math.abs(dy)
+    resetSwipeBack()
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    } catch {
+      // ignore
+    }
+    if (shouldGoBack) openHome(browseClassRef.current)
+  }
+
   if (screen === 'auth') {
     return (
       <main className="auth-page">
@@ -1893,7 +1962,14 @@ function App() {
           )}
         </section>
       ) : mainView === 'feed' ? (
-      <div className="feed-layout">
+      <div
+        className={`feed-layout${swipeBackOffset > 0 ? ' is-swiping-back' : ''}`}
+        style={swipeBackOffset > 0 ? { transform: `translateX(${swipeBackOffset}px)` } : undefined}
+        onPointerDown={onStudySwipeStart}
+        onPointerMove={onStudySwipeMove}
+        onPointerUp={onStudySwipeEnd}
+        onPointerCancel={resetSwipeBack}
+      >
         <section className="feed-scroll" ref={feedRef} aria-label="Study feed">
           {visibleFeedItems.map((item, index) => (
             <div
