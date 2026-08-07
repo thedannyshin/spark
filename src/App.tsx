@@ -1246,6 +1246,11 @@ function App() {
     return filtered.sort((a, b) => score(b) - score(a))
   }, [selectedClass, topicStatus, allPosts, passiveMode])
 
+  const homeVideos = useMemo(
+    () => visiblePosts.filter((post) => post.modality === 'video' && post.video),
+    [visiblePosts],
+  )
+
   const visibleDues = useMemo(() => {
     const list = selectedClass === 'All'
       ? [...upcomingItems]
@@ -1760,53 +1765,85 @@ function App() {
 
       {mainView === 'home' ? (
         <section className="panel-view home-view" aria-label="Home">
-          <p className="mobile-page-title">
-            {selectedClass === 'All' ? 'Home' : selectedClass}
-          </p>
-          <header className="panel-header home-header">
-            <h1>{selectedClass === 'All' ? 'For you' : selectedClass}</h1>
-            <p>
-              {selectedClass === 'All'
-                ? 'Browse study clips, then tap one to open Active mode.'
-                : `Browse ${selectedClass} clips, then tap one to study.`}
-            </p>
+          <header className="home-topbar">
+            <img src="/logo.png" alt="Spark" className="home-topbar-logo" />
           </header>
 
-          {visiblePosts.length === 0 ? (
+          {homeVideos.length === 0 ? (
             <div className="panel-empty">
-              <p>No posts in this class yet.</p>
+              <p>No videos in this class yet.</p>
             </div>
           ) : (
-            <ul className="home-grid">
-              {visiblePosts.map((post) => (
-                <li key={post.id}>
-                  <button
-                    type="button"
-                    className="home-tile"
-                    onClick={() => openStudyPost(post.id)}
-                    aria-label={`Open ${post.title}`}
-                  >
-                    <span className="home-thumb">
-                      {post.modality === 'video' && post.video ? (
-                        <video src={post.video} muted playsInline preload="metadata" />
-                      ) : (
-                        <span className="media-quiz-thumb">Quiz</span>
-                      )}
-                      <span className="home-tile-shade" aria-hidden="true" />
-                      <span className="home-tile-meta">
-                        <span className="home-tile-class">{post.classCode}</span>
-                        <strong>{post.title}</strong>
-                      </span>
-                      {post.modality === 'video' && (
-                        <span className="home-tile-play" aria-hidden="true">
-                          <Play size={18} fill="currentColor" />
+            <div className="ig-feed">
+              {homeVideos.map((post) => {
+                const classMeta = classFilters.find((item) => item.id === post.classCode)
+                const ClassIcon = classMeta?.Icon ?? BookOpen
+                const poster = !post.postedBy || post.postedBy === 'Spark AI'
+                  ? 'Spark AI'
+                  : formatPosterName(post.postedBy)
+                const saved = savedIds.includes(post.id)
+                return (
+                  <article key={post.id} className="ig-post">
+                    <header className="ig-post-header">
+                      <button
+                        type="button"
+                        className="ig-post-user"
+                        onClick={() => openHome(post.classCode)}
+                        aria-label={`View ${post.classCode}`}
+                      >
+                        <span className="ig-post-avatar" aria-hidden="true">
+                          <ClassIcon size={18} strokeWidth={2.2} />
                         </span>
-                      )}
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
+                        <span className="ig-post-user-copy">
+                          <strong>{poster}</strong>
+                          <span>{post.classCode}</span>
+                        </span>
+                      </button>
+                    </header>
+
+                    <button
+                      type="button"
+                      className="ig-post-media"
+                      onClick={() => openStudyPost(post.id)}
+                      aria-label={`Open ${post.title}`}
+                    >
+                      <video src={post.video} muted playsInline preload="metadata" />
+                      <span className="ig-post-play" aria-hidden="true">
+                        <Play size={28} fill="currentColor" />
+                      </span>
+                    </button>
+
+                    <div className="ig-post-actions">
+                      <button
+                        type="button"
+                        className="ig-action"
+                        aria-label={saved ? 'Unsave' : 'Save'}
+                        onClick={() => toggleSaved(post.id)}
+                      >
+                        <Bookmark size={22} strokeWidth={2} fill={saved ? 'currentColor' : 'none'} />
+                      </button>
+                      <button
+                        type="button"
+                        className="ig-action ig-action-study"
+                        onClick={() => openStudyPost(post.id)}
+                      >
+                        Study
+                        <ChevronRight size={16} strokeWidth={2.4} />
+                      </button>
+                    </div>
+
+                    <div className="ig-post-caption">
+                      <p>
+                        <strong>{poster}</strong>
+                        {' '}
+                        {post.title}
+                      </p>
+                      <p className="ig-post-source">{post.sourceLabel}</p>
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
           )}
         </section>
       ) : mainView === 'feed' ? (
