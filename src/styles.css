@@ -485,7 +485,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   background: #111;
   display: block;
 }
-.media-thumb video {
+.media-thumb video,
+.media-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -645,7 +646,8 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
   overflow: hidden;
   -webkit-tap-highlight-color: transparent;
 }
-.ig-post-media video {
+.ig-post-media video,
+.ig-post-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;

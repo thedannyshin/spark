@@ -515,6 +515,42 @@ function formatPosterName(name: string) {
   return `${parts[0]} ${parts[parts.length - 1][0]}`
 }
 
+function videoPosterSrc(video?: string) {
+  if (!video || video.startsWith('blob:') || video.startsWith('data:')) return null
+  const path = video.split('?')[0]?.split('#')[0] ?? video
+  if (!path.endsWith('.mp4') && !path.endsWith('.webm') && !path.endsWith('.mov')) return null
+  const file = path.split('/').pop()
+  if (!file) return null
+  return `/posters/${file.replace(/\.(mp4|webm|mov)$/i, '.jpg')}`
+}
+
+function VideoThumb({
+  video,
+  eager = false,
+  fallbackLabel = 'Quiz',
+}: {
+  video?: string
+  eager?: boolean
+  fallbackLabel?: string
+}) {
+  const poster = videoPosterSrc(video)
+  if (poster) {
+    return (
+      <img
+        src={poster}
+        alt=""
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        fetchPriority={eager ? 'high' : 'auto'}
+      />
+    )
+  }
+  if (video) {
+    return <video src={video} muted playsInline preload="metadata" />
+  }
+  return <span className="media-quiz-thumb">{fallbackLabel}</span>
+}
+
 function getVideoAttribution(postedBy: string | undefined, currentUserName: string) {
   if (!postedBy || postedBy === 'Spark AI') {
     return 'Spark AI generated this video'
@@ -1084,20 +1120,6 @@ function App() {
     } catch {
       // ignore clipboard failures
     }
-  }
-
-  const showHomeVideoFrame = (video: HTMLVideoElement) => {
-    const reveal = () => {
-      if (video.readyState >= 2 && video.currentTime < 0.05) {
-        try {
-          video.currentTime = 0.05
-        } catch {
-          // ignore seek errors before enough data
-        }
-      }
-    }
-    if (video.readyState >= 1) reveal()
-    else video.addEventListener('loadedmetadata', reveal, { once: true })
   }
 
   const openFeedClass = (classCode: string) => {
@@ -1937,7 +1959,7 @@ function App() {
             </div>
           ) : (
             <div className="ig-feed">
-              {homeVideos.map((post) => {
+              {homeVideos.map((post, index) => {
                 const classMeta = classFilters.find((item) => item.id === post.classCode)
                 const ClassIcon = classMeta?.Icon ?? BookOpen
                 const userName = classMeta?.label ?? post.classCode
@@ -1967,14 +1989,7 @@ function App() {
                       onClick={() => openStudyPost(post.id)}
                       aria-label={`Open ${post.title}`}
                     >
-                      <video
-                        src={post.video}
-                        muted
-                        playsInline
-                        preload="metadata"
-                        onLoadedMetadata={(event) => showHomeVideoFrame(event.currentTarget)}
-                        onLoadedData={(event) => showHomeVideoFrame(event.currentTarget)}
-                      />
+                      <VideoThumb video={post.video} eager={index < 2} />
                       <span className="ig-post-play" aria-hidden="true">
                         <Play size={28} fill="currentColor" />
                       </span>
@@ -2308,7 +2323,7 @@ function App() {
                   >
                     <span className="media-thumb">
                       {post.modality === 'video' && post.video ? (
-                        <video src={post.video} muted playsInline preload="metadata" />
+                        <VideoThumb video={post.video} />
                       ) : (
                         <span className="media-quiz-thumb">Quiz</span>
                       )}
@@ -2575,7 +2590,7 @@ function App() {
                     >
                       <span className="media-thumb">
                         {post.video ? (
-                          <video src={post.video} muted playsInline preload="metadata" />
+                          <VideoThumb video={post.video} fallbackLabel="Video" />
                         ) : (
                           <span className="media-quiz-thumb">Video</span>
                         )}
