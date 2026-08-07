@@ -1889,7 +1889,6 @@ function App() {
                         {' '}
                         {post.title}
                       </p>
-                      <p className="ig-post-source">{post.sourceLabel}</p>
                     </div>
                   </article>
                 )

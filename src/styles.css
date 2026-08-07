@@ -707,10 +707,6 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); ou
 .ig-post-caption strong {
   font-weight: 700;
 }
-.ig-post-source {
-  color: #8a8a8a !important;
-  font-size: 12px !important;
-}
 .study-back-btn {
   display: grid;
   place-items: center;
