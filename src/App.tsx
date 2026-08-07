@@ -1884,11 +1884,7 @@ function App() {
                     </div>
 
                     <div className="ig-post-caption">
-                      <p>
-                        <strong>{userName}</strong>
-                        {' '}
-                        {post.title}
-                      </p>
+                      <p>{post.title}</p>
                     </div>
                   </article>
                 )
