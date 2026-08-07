@@ -53,7 +53,7 @@ import {
 } from 'lucide-react'
 
 type Screen = 'auth' | 'connect' | 'syncing' | 'feed'
-type MainView = 'feed' | 'saved' | 'upload' | 'profile'
+type MainView = 'home' | 'feed' | 'saved' | 'upload' | 'profile'
 type SavedFilter = 'all' | 'video' | 'drill'
 type AuthMode = 'login' | 'signup'
 type Provider = 'Google Classroom' | 'Canvas'
@@ -732,7 +732,7 @@ function getFeedItemKey(item: FeedItem, index: number) {
 function App() {
   const initialSession = useMemo(() => readSession(), [])
   const [screen, setScreen] = useState<Screen>(() => initialSession.screen)
-  const [mainView, setMainView] = useState<MainView>('feed')
+  const [mainView, setMainView] = useState<MainView>('home')
   const [authMode, setAuthMode] = useState<AuthMode>('signup')
   const [provider, setProvider] = useState<Provider | null>(() => initialSession.provider)
   const [syncProgress, setSyncProgress] = useState(0)
@@ -777,6 +777,8 @@ function App() {
   const [feedPositions, setFeedPositions] = useState<FeedPositions>(() => readFeedPositions())
   const feedRef = useRef<HTMLElement>(null)
   const restoreFeedRef = useRef(true)
+  const pendingStudyPostIdRef = useRef<number | null>(null)
+  const browseClassRef = useRef('All')
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const passiveMode = mobileStudy && studyMode === 'passive'
 
@@ -1008,9 +1010,35 @@ function App() {
     setMediaEnabled(false)
     writeWelcomePending(true)
     setWelcomePending(true)
-    setMainView('feed')
+    setMainView('home')
     setScreen('feed')
     setActiveIndex(0)
+    pendingStudyPostIdRef.current = null
+    restoreFeedRef.current = true
+  }
+
+  const openHome = (classCode: string = 'All') => {
+    if (classCode !== 'All' && !classesWithPosts.has(classCode)) return
+    setSelectedClass(classCode)
+    browseClassRef.current = classCode
+    setMainView('home')
+    setCommentsOpen(false)
+    setMobileNavOpen(false)
+    pendingStudyPostIdRef.current = null
+    localStorage.setItem(LAST_FEED_CLASS_KEY, classCode)
+  }
+
+  const openStudyPost = (postId: number) => {
+    const post = allPosts.find((item) => item.id === postId)
+    if (!post) return
+    browseClassRef.current = selectedClass
+    pendingStudyPostIdRef.current = postId
+    setStudyMode('active')
+    setSelectedClass('All')
+    setMainView('feed')
+    setCommentsOpen(false)
+    setMobileNavOpen(false)
+    localStorage.setItem(LAST_FEED_CLASS_KEY, 'All')
     restoreFeedRef.current = true
   }
 
@@ -1018,9 +1046,12 @@ function App() {
     if (classCode !== 'All' && !classesWithPosts.has(classCode)) return
     setSelectedClass(classCode)
     setMainView('feed')
+    setStudyMode('active')
     setCommentsOpen(false)
     setMobileNavOpen(false)
+    pendingStudyPostIdRef.current = null
     localStorage.setItem(LAST_FEED_CLASS_KEY, classCode)
+    restoreFeedRef.current = true
   }
 
   const openMainView = (view: MainView) => {
@@ -1052,7 +1083,7 @@ function App() {
     setSelectedClass('All')
     setCommentsOpen(false)
     setShowAllDues(false)
-    setMainView('feed')
+    setMainView('home')
     setScreen('auth')
     restoreFeedRef.current = true
   }
@@ -1093,7 +1124,10 @@ function App() {
         ])
         resetUploadForm()
         setSelectedClass(classCode)
+        pendingStudyPostIdRef.current = nextId
+        setStudyMode('active')
         setMainView('feed')
+        restoreFeedRef.current = true
       }, 1200)
       return
     }
@@ -1117,7 +1151,10 @@ function App() {
     ])
     resetUploadForm()
     setSelectedClass(classCode)
+    pendingStudyPostIdRef.current = nextId
+    setStudyMode('active')
     setMainView('feed')
+    restoreFeedRef.current = true
   }
 
   const submitAuth = (event: FormEvent<HTMLFormElement>) => {
@@ -1268,11 +1305,17 @@ function App() {
 
   const dismissWelcome = () => {
     if (!welcomePending) return
-    const nextIndex = Math.max(0, activeIndex - 1)
+    const pendingId = pendingStudyPostIdRef.current
     writeWelcomePending(false)
     setWelcomePending(false)
-    setActiveIndex(nextIndex)
     window.requestAnimationFrame(() => {
+      if (pendingId != null) {
+        pendingStudyPostIdRef.current = null
+        pinFeedToPost(pendingId)
+        return
+      }
+      const nextIndex = Math.max(0, activeIndex - 1)
+      setActiveIndex(nextIndex)
       const slides = feedRef.current?.querySelectorAll<HTMLElement>('.feed-slide')
       slides?.[nextIndex]?.scrollIntoView({ behavior: 'auto', block: 'start' })
     })
@@ -1364,10 +1407,17 @@ function App() {
     if (screen !== 'feed' || mainView !== 'feed' || !restoreFeedRef.current) return
     if (visibleFeedItems.length === 0) return
 
+    const pendingId = pendingStudyPostIdRef.current
     const savedKey = feedPositions[selectedClass]
     let targetIndex = 0
     if (welcomePending || !mediaEnabled) {
       targetIndex = 0
+    } else if (pendingId != null) {
+      const found = visibleFeedItems.findIndex((item) => (
+        item.type === 'post' && item.post.id === pendingId
+      ))
+      if (found >= 0) targetIndex = found
+      pendingStudyPostIdRef.current = null
     } else if (savedKey) {
       const found = visibleFeedItems.findIndex((item, index) => (
         getFeedItemKey(item, index) === savedKey
@@ -1570,7 +1620,7 @@ function App() {
         aria-label="Open menu"
         aria-expanded={mobileNavOpen}
         aria-controls="app-sidebar"
-        hidden={mobileNavOpen || passiveMode}
+        hidden={mobileNavOpen || passiveMode || mainView === 'feed'}
         onClick={() => {
           setCommentsOpen(false)
           setMobileNavOpen(true)
@@ -1610,6 +1660,18 @@ function App() {
         </div>
       )}
 
+      {mainView === 'feed' && (
+        <button
+          type="button"
+          className="study-back-btn"
+          aria-label="Back to home"
+          hidden={mobileNavOpen || passiveMode}
+          onClick={() => openHome(browseClassRef.current)}
+        >
+          <ArrowLeft size={22} strokeWidth={2.2} />
+        </button>
+      )}
+
       {mobileNavOpen && (
         <button
           type="button"
@@ -1639,11 +1701,11 @@ function App() {
             <div className="nav-block">
               <button
                 type="button"
-                className={`nav-parent ${mainView === 'feed' && selectedClass === 'All' ? 'active' : ''}`}
-                onClick={() => openFeedClass('All')}
+                className={`nav-parent ${mainView === 'home' && selectedClass === 'All' ? 'active' : ''}`}
+                onClick={() => openHome('All')}
               >
-                <Home size={22} strokeWidth={mainView === 'feed' && selectedClass === 'All' ? 2.4 : 2} />
-                <span>Feed</span>
+                <Home size={22} strokeWidth={mainView === 'home' && selectedClass === 'All' ? 2.4 : 2} />
+                <span>Home</span>
               </button>
 
               <div className="nav-sub" role="group" aria-label="Classes">
@@ -1652,13 +1714,13 @@ function App() {
                   return (
                     <button
                       type="button"
-                      className={mainView === 'feed' && selectedClass === id ? 'active' : ''}
+                      className={mainView === 'home' && selectedClass === id ? 'active' : ''}
                       key={id}
                       disabled={!enabled}
                       aria-disabled={!enabled}
-                      onClick={() => openFeedClass(id)}
+                      onClick={() => openHome(id)}
                     >
-                      <Icon size={18} strokeWidth={mainView === 'feed' && selectedClass === id ? 2.4 : 2} />
+                      <Icon size={18} strokeWidth={mainView === 'home' && selectedClass === id ? 2.4 : 2} />
                       <span>{label}</span>
                     </button>
                   )
@@ -1696,7 +1758,58 @@ function App() {
         </div>
       </aside>
 
-      {mainView === 'feed' ? (
+      {mainView === 'home' ? (
+        <section className="panel-view home-view" aria-label="Home">
+          <p className="mobile-page-title">
+            {selectedClass === 'All' ? 'Home' : selectedClass}
+          </p>
+          <header className="panel-header home-header">
+            <h1>{selectedClass === 'All' ? 'For you' : selectedClass}</h1>
+            <p>
+              {selectedClass === 'All'
+                ? 'Browse study clips, then tap one to open Active mode.'
+                : `Browse ${selectedClass} clips, then tap one to study.`}
+            </p>
+          </header>
+
+          {visiblePosts.length === 0 ? (
+            <div className="panel-empty">
+              <p>No posts in this class yet.</p>
+            </div>
+          ) : (
+            <ul className="home-grid">
+              {visiblePosts.map((post) => (
+                <li key={post.id}>
+                  <button
+                    type="button"
+                    className="home-tile"
+                    onClick={() => openStudyPost(post.id)}
+                    aria-label={`Open ${post.title}`}
+                  >
+                    <span className="home-thumb">
+                      {post.modality === 'video' && post.video ? (
+                        <video src={post.video} muted playsInline preload="metadata" />
+                      ) : (
+                        <span className="media-quiz-thumb">Quiz</span>
+                      )}
+                      <span className="home-tile-shade" aria-hidden="true" />
+                      <span className="home-tile-meta">
+                        <span className="home-tile-class">{post.classCode}</span>
+                        <strong>{post.title}</strong>
+                      </span>
+                      {post.modality === 'video' && (
+                        <span className="home-tile-play" aria-hidden="true">
+                          <Play size={18} fill="currentColor" />
+                        </span>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      ) : mainView === 'feed' ? (
       <div className="feed-layout">
         <section className="feed-scroll" ref={feedRef} aria-label="Study feed">
           {visibleFeedItems.map((item, index) => (
@@ -1854,9 +1967,9 @@ function App() {
                           <button
                             type="button"
                             className="lesson-primary"
-                            onClick={() => openFeedClass('All')}
+                            onClick={() => openHome('All')}
                           >
-                            Back to feed
+                            Back to home
                           </button>
                         </div>
                       )}
@@ -1961,8 +2074,8 @@ function App() {
           {savedPosts.length === 0 ? (
             <div className="panel-empty">
               <p>Tap Save on any post to keep it here.</p>
-              <button type="button" className="lesson-primary" onClick={() => openFeedClass('All')}>
-                Back to feed
+              <button type="button" className="lesson-primary" onClick={() => openHome('All')}>
+                Back to home
               </button>
             </div>
           ) : filteredSavedPosts.length === 0 ? (
@@ -1976,7 +2089,7 @@ function App() {
                   <button
                     type="button"
                     className="media-tile"
-                    onClick={() => openFeedClass(post.classCode)}
+                    onClick={() => openStudyPost(post.id)}
                   >
                     <span className="media-thumb">
                       {post.modality === 'video' && post.video ? (
@@ -2204,7 +2317,7 @@ function App() {
                     type="button"
                     disabled={!enabled}
                     aria-disabled={!enabled}
-                    onClick={() => openFeedClass(item.id)}
+                    onClick={() => openHome(item.id)}
                   >
                     <span className="progress-class-top">
                       <span className="progress-class-name">
@@ -2243,7 +2356,7 @@ function App() {
                     <button
                       type="button"
                       className="media-tile"
-                      onClick={() => openFeedClass(post.classCode)}
+                      onClick={() => openStudyPost(post.id)}
                     >
                       <span className="media-thumb">
                         {post.video ? (
