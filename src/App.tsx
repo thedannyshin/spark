@@ -1549,7 +1549,7 @@ function App() {
   }, [activeIndex])
 
   useEffect(() => {
-    if (screen !== 'feed') return
+    if (screen !== 'feed' || mainView !== 'feed') return
     const root = feedRef.current
     if (!root) return
 
@@ -1592,10 +1592,10 @@ function App() {
       observer.disconnect()
       root.removeEventListener('scroll', syncActiveFromScroll)
     }
-  }, [visibleFeedItems.length, selectedClass, screen])
+  }, [visibleFeedItems.length, selectedClass, screen, mainView, studyStartPostId])
 
   useEffect(() => {
-    if (screen !== 'feed') return
+    if (screen !== 'feed' || mainView !== 'feed') return
     const root = feedRef.current
     if (!root) return
     const slides = root.querySelectorAll<HTMLElement>('.feed-slide')
@@ -1604,9 +1604,10 @@ function App() {
       slide.querySelectorAll('video').forEach((video) => {
         video.pause()
         video.muted = true
+        video.currentTime = video.currentTime
       })
     })
-  }, [activeIndex, screen, visibleFeedItems.length])
+  }, [activeIndex, screen, mainView, visibleFeedItems.length])
 
   const scrollFeed = (direction: -1 | 1) => {
     const next = Math.min(Math.max(activeIndex + direction, 0), Math.max(visibleFeedItems.length - 1, 0))
