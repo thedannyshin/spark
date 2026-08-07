@@ -770,6 +770,7 @@ function App() {
   const [mediaEnabled, setMediaEnabled] = useState(() => readMediaEnabled())
   const [mediaEnabling, setMediaEnabling] = useState(false)
   const [welcomePending, setWelcomePending] = useState(() => readWelcomePending())
+  const [studyStartPostId, setStudyStartPostId] = useState<number | null>(null)
   const initialProfile = useMemo(() => readProfile(), [])
   const [profileName, setProfileName] = useState(initialProfile.name)
   const [profileEmail, setProfileEmail] = useState(initialProfile.email)
@@ -780,6 +781,7 @@ function App() {
   const pendingStudyPostIdRef = useRef<number | null>(null)
   const pendingOpenCommentsRef = useRef(false)
   const browseClassRef = useRef('All')
+  const warmVideoRef = useRef<HTMLVideoElement | null>(null)
   const [homeLinkCopiedId, setHomeLinkCopiedId] = useState<number | null>(null)
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const passiveMode = mobileStudy && studyMode === 'passive'
@@ -1015,6 +1017,7 @@ function App() {
     setMainView('home')
     setScreen('feed')
     setActiveIndex(0)
+    setStudyStartPostId(null)
     pendingStudyPostIdRef.current = null
     restoreFeedRef.current = true
   }
@@ -1026,7 +1029,10 @@ function App() {
     setMainView('home')
     setCommentsOpen(false)
     setMobileNavOpen(false)
+    setStudyStartPostId(null)
     pendingStudyPostIdRef.current = null
+    pendingOpenCommentsRef.current = false
+    warmVideoRef.current = null
     localStorage.setItem(LAST_FEED_CLASS_KEY, classCode)
   }
 
@@ -1036,11 +1042,33 @@ function App() {
     browseClassRef.current = selectedClass
     pendingStudyPostIdRef.current = postId
     pendingOpenCommentsRef.current = Boolean(options?.comments)
+
+    // Warm the selected file under this tap so Active mode can reuse the cache.
+    if (post.video) {
+      const warm = document.createElement('video')
+      warm.preload = 'auto'
+      warm.muted = true
+      warm.playsInline = true
+      warm.src = post.video
+      void warm.load()
+      warmVideoRef.current = warm
+    }
+
+    // Opening from Home is an explicit media gesture — skip the welcome gate.
+    markSessionAudioUnlocked()
+    unlockSpeechSynthesis()
+    warmUpSpeechRecognition()
+    writeMediaEnabled(true)
+    setMediaEnabled(true)
+    writeWelcomePending(false)
+    setWelcomePending(false)
+    setStudyStartPostId(postId)
     setStudyMode('active')
     setSelectedClass('All')
     setMainView('feed')
     setCommentsOpen(false)
     setMobileNavOpen(false)
+    setActiveIndex(0)
     localStorage.setItem(LAST_FEED_CLASS_KEY, 'All')
     restoreFeedRef.current = true
   }
@@ -1077,6 +1105,7 @@ function App() {
     setSelectedClass(classCode)
     setMainView('feed')
     setStudyMode('active')
+    setStudyStartPostId(null)
     setCommentsOpen(false)
     setMobileNavOpen(false)
     pendingStudyPostIdRef.current = null
@@ -1115,6 +1144,7 @@ function App() {
     setShowAllDues(false)
     setMainView('home')
     setScreen('auth')
+    setStudyStartPostId(null)
     restoreFeedRef.current = true
   }
 
@@ -1155,6 +1185,11 @@ function App() {
         resetUploadForm()
         setSelectedClass(classCode)
         pendingStudyPostIdRef.current = nextId
+        setStudyStartPostId(nextId)
+        writeWelcomePending(false)
+        setWelcomePending(false)
+        writeMediaEnabled(true)
+        setMediaEnabled(true)
         setStudyMode('active')
         setMainView('feed')
         restoreFeedRef.current = true
@@ -1182,6 +1217,11 @@ function App() {
     resetUploadForm()
     setSelectedClass(classCode)
     pendingStudyPostIdRef.current = nextId
+    setStudyStartPostId(nextId)
+    writeWelcomePending(false)
+    setWelcomePending(false)
+    writeMediaEnabled(true)
+    setMediaEnabled(true)
     setStudyMode('active')
     setMainView('feed')
     restoreFeedRef.current = true
@@ -1314,22 +1354,36 @@ function App() {
   }, [visibleDues, showAssignmentCard, visiblePosts, allPostsComplete, welcomePending])
 
   const visibleFeedItems = useMemo(() => {
+    const applyDrillGate = (items: FeedItem[]) => {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (
+          item.type === 'post'
+          && item.post.modality === 'drill'
+          && !answeredIds.includes(item.post.id)
+        ) {
+          return items.slice(0, i + 1)
+        }
+      }
+      return items
+    }
+
+    // Home → Active: start on the tapped video (skip welcome + earlier quizzes).
+    if (studyStartPostId != null) {
+      const withoutWelcome = feedItems.filter((item) => item.type !== 'welcome')
+      const start = withoutWelcome.findIndex((item) => (
+        item.type === 'post' && item.post.id === studyStartPostId
+      ))
+      if (start >= 0) return applyDrillGate(withoutWelcome.slice(start))
+      return applyDrillGate(withoutWelcome)
+    }
+
     // Must enable media before leaving the welcome card.
     if (welcomePending && !mediaEnabled) {
       return feedItems.filter((item) => item.type === 'welcome')
     }
-    for (let i = 0; i < feedItems.length; i++) {
-      const item = feedItems[i]
-      if (
-        item.type === 'post'
-        && item.post.modality === 'drill'
-        && !answeredIds.includes(item.post.id)
-      ) {
-        return feedItems.slice(0, i + 1)
-      }
-    }
-    return feedItems
-  }, [feedItems, answeredIds, welcomePending, mediaEnabled])
+    return applyDrillGate(feedItems)
+  }, [feedItems, answeredIds, welcomePending, mediaEnabled, studyStartPostId])
 
   const activeFeedKeyRef = useRef<string | null>(null)
 
@@ -1448,14 +1502,15 @@ function App() {
     const pendingId = pendingStudyPostIdRef.current
     const savedKey = feedPositions[selectedClass]
     let targetIndex = 0
-    if (welcomePending || !mediaEnabled) {
-      targetIndex = 0
-    } else if (pendingId != null) {
+    if (studyStartPostId != null || pendingId != null) {
+      const focusId = studyStartPostId ?? pendingId
       const found = visibleFeedItems.findIndex((item) => (
-        item.type === 'post' && item.post.id === pendingId
+        item.type === 'post' && item.post.id === focusId
       ))
-      if (found >= 0) targetIndex = found
+      targetIndex = found >= 0 ? found : 0
       pendingStudyPostIdRef.current = null
+    } else if (welcomePending || !mediaEnabled) {
+      targetIndex = 0
     } else if (savedKey) {
       const found = visibleFeedItems.findIndex((item, index) => (
         getFeedItemKey(item, index) === savedKey
@@ -1476,7 +1531,7 @@ function App() {
         setCommentsOpen(true)
       }
     })
-  }, [screen, mainView, selectedClass, visibleFeedItems.length, feedPositions, mediaEnabled, welcomePending])
+  }, [screen, mainView, selectedClass, visibleFeedItems.length, feedPositions, mediaEnabled, welcomePending, studyStartPostId])
 
   useEffect(() => {
     if (screen !== 'feed' || mainView !== 'feed' || restoreFeedRef.current) return
@@ -1912,10 +1967,10 @@ function App() {
                       aria-label={`Open ${post.title}`}
                     >
                       <video
-                        src={`${post.video}#t=0.1`}
+                        src={post.video}
                         muted
                         playsInline
-                        preload="auto"
+                        preload="metadata"
                         onLoadedMetadata={(event) => showHomeVideoFrame(event.currentTarget)}
                         onLoadedData={(event) => showHomeVideoFrame(event.currentTarget)}
                       />
